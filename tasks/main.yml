@@ -1,0 +1,29 @@
+- name: Create directory to store firewall rules
+  file:
+    path: /etc/iptables
+    state: directory
+    mode: u=rwx,g=rx,o=rx
+
+- name: Create IPv4 firewall rules
+  template:
+    src: rules.v4.j2
+    dest: /etc/iptables/rules.v4
+    mode: u=rw,g=r,o=r
+  register: ipv4
+
+- name: Apply IPv4 rules
+  command:
+    cmd: iptables-restore /etc/iptables/rules.v4
+  when: ipv4.changed
+
+- name: Create IPv6 rules
+  template:
+    src: rules.v6.j2
+    dest: /etc/iptables/rules.v6
+    mode: u=rw,g=r,o=r
+  register: ipv6
+
+- name: Apply IPv6 rules
+  command:
+    cmd: ip6tables-restore /etc/iptables/rules.v6
+  when: ipv6.changed
