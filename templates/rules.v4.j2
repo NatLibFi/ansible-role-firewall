@@ -4,6 +4,9 @@
 :OUTPUT ACCEPT [0:0]
 -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
 -A INPUT -i lo -j ACCEPT
+{% if firewall_noicmp is not defined or not firewall_noicmp %}
+-A INPUT -p icmp -j ACCEPT
+{% endif %}
 {% if firewall_rules is defined and firewall_rules %}
 {% for rule in firewall_rules %}
 -A INPUT {{ rule }}
