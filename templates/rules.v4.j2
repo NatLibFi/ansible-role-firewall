@@ -6,6 +6,7 @@
 {% for rule in firewall_rules %}
 -A INPUT {{ rule }}
 {% endfor %}
+-A INPUT -p icmp -j ACCEPT
 -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
 -A INPUT -i lo -j ACCEPT
 COMMIT
