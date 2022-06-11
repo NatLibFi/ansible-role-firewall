@@ -21,6 +21,39 @@
     - "net.ipv6.conf.default.disable_ipv6"
     - "net.ipv6.conf.lo.disable_ipv6"
 
+- name: Form up IPv4 rules set
+  block:
+
+    - name: "Form up IPv4 rules set. Step 1: expand base rules"
+      set_fact:
+        firewall_ips_http:  "{{ firewall_ips_http_base }}{% if firewall_ips_http is defined and firewall_ips_http|length>0 %}{% if firewall_ips_http_base|length>0 %},{% endif %}{{firewall_ips_http}}{% endif %}"
+        firewall_ips_sru:   "{{ firewall_ips_sru_base }}{% if firewall_ips_sru is defined and firewall_ips_sru|length>0 %}{% if firewall_ips_sru_base|length>0 %},{% endif %}{{firewall_ips_sru}}{% endif %}"
+        firewall_ips_sip:   "{{ firewall_ips_sip_base }}{% if firewall_ips_sip is defined and firewall_ips_sip|length>0 %}{% if firewall_ips_sip_base|length>0 %},{% endif %}{{firewall_ips_sip}}{% endif %}"
+        firewall_ips_monit: "{{ firewall_ips_monit_base }}{% if firewall_ips_monit is defined and firewall_ips_monit|length>0 %}{% if firewall_ips_monit_base|length>0 %},{% endif %}{{firewall_ips_monit}}{% endif %}"
+        firewall_ips_ssh:   "{{ firewall_ips_ssh_base }}{% if firewall_ips_ssh is defined and firewall_ips_ssh|length>0 %}{% if firewall_ips_ssh_base|length>0 %},{% endif %}{{firewall_ips_ssh}}{% endif %}"
+
+    - name: "Form up IPv4 rules set. Step 2: combine geenral rules"
+      set_fact: firewall_rules="{{ firewall_rules|default([]) + [ '-s '+item.ips+' -p tcp -m tcp --dport '+item.port+' -j ACCEPT' ] }}"
+      when: item.ips|length > 0
+      with_items:
+        - { ips: "{{ firewall_ips_http }}",  port: "443" }
+        - { ips: "{{ firewall_ips_sru }}",   port: "210" }
+        - { ips: "{{ firewall_ips_sip }}",   port: "6001" }
+        - { ips: "{{ firewall_ips_monit }}", port: "5666" }
+        - { ips: "{{ firewall_ips_ssh }}",   port: "22" }
+        - { ips: "{{ firewall_ips_http }}",  port: "80" }
+
+    - name: "Form up IPv4 rules set. Step 3: combine to custom rules"
+      set_fact:
+        firewall_rules: "{{ firewall_rules|default([]) + firewall_rules_custom_base|default([]) + firewall_rules_custom|default([]) }}"
+
+  when: firewall_ips_http|default('')|length>0 or firewall_ips_http_base|default('')|length>0 or
+        firewall_ips_sru|default('')|length>0 or firewall_ips_sru_base|default('')|length>0 or
+        firewall_ips_sip|default('')|length>0 or firewall_ips_sip_base|default('')|length>0 or
+        firewall_ips_monit|default('')|length>0 or firewall_ips_monit_base|default('')|length>0 or
+        firewall_ips_ssh|default('')|length>0 or firewall_ips_ssh_base|default('')|length>0 or
+        firewall_rules_custom_base|default('')|length>0 or firewall_rules_custom|default('')|length>0
+
 - name: Create IPv4 firewall rules
   template:
     src: rules.v4.j2
