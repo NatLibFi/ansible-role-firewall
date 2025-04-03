@@ -1,0 +1,44 @@
+---
+
+# This playbook is designed to run on all hosts in the certbot group
+# to update the certbot package and manage the Apache service.
+# It includes tasks to open and close port 80 in iptables, stop the Apache service,
+# run certbot to obtain or renew SSL certificates, and then restart the Apache service.
+
+- name: Update certbot
+  become: true
+  when: inventory_hostname in groups['certbot']
+  block:
+
+    - name: "Open port 80 in iptables"
+      lineinfile:
+        path: /etc/iptables/rules.v4
+        regexp: '^#{{ certbot_80_iptables_line }}'
+        line: '{{ certbot_80_iptables_line }}'
+        state: present
+
+    - name: "Apply iptables"
+      command: iptables-restore < /etc/iptables/rules.v4
+
+    - name: "Stop Apache"
+      service:
+        name: apache2
+        state: stopped
+
+    - name: "Run certbot"
+      command: certbot --apache
+
+    - name: "Start Apache"
+      service:
+        name: apache2
+        state: started
+
+    - name: "Close port 80 in iptables"
+      lineinfile:
+        path: /etc/iptables/rules.v4
+        regexp: '^{{ certbot_80_iptables_line }}'
+        line: '#{{ certbot_80_iptables_line }}'
+        state: present
+
+    - name: "Apply iptables again"
+      command: iptables-restore < /etc/iptables/rules.v4
