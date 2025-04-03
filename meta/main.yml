@@ -1,0 +1,14 @@
+galaxy_info:
+  role_name: firewall
+  description: Setup IPv4 firewall rules
+  author: Joonas Kylmälä
+  company: University of Helsinki
+  license: MIT
+  min_ansible_version: 2.9
+  platforms:
+    - name: Debian
+      versions:
+        - 9
+  galaxy_tags:
+    - firewall
+dependencies: []

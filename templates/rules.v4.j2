@@ -1,0 +1,11 @@
+*filter
+:INPUT DROP [0:0]
+:FORWARD DROP [0:0]
+:OUTPUT ACCEPT [0:0]
+
+{% for rule in firewall_rules %}
+-A INPUT {{ rule }}
+{% endfor %}
+-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+-A INPUT -i lo -j ACCEPT
+COMMIT
