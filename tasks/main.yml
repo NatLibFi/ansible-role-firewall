@@ -1,3 +1,5 @@
+---
+
 - name: Create directory to store firewall rules
   file:
     path: /etc/iptables
@@ -14,8 +16,8 @@
     name: "{{ item }}"
     value: "1"
     state: present
-    sysctl_set: yes
-    reload: yes
+    sysctl_set: true
+    reload: true
   loop:
     - "net.ipv6.conf.all.disable_ipv6"
     - "net.ipv6.conf.default.disable_ipv6"
