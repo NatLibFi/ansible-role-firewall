@@ -1,3 +1,5 @@
 ---
 
 firewall_rules: []
+
+certbot_80_iptables_line: '-A INPUT -p tcp -m tcp --dport 80 -j ACCEPT # open this temporarily for certbot renewals'

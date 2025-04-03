@@ -7,6 +7,9 @@
 {% if firewall_noicmp is not defined or not firewall_noicmp %}
 -A INPUT -p icmp -j ACCEPT
 {% endif %}
+{% if inventory_hostname in groups['certbot'] %}
+#{{ certbot_80_iptables_line }}
+{% endif -%}
 {% if firewall_rules is defined and firewall_rules %}
 {% for rule in firewall_rules %}
 -A INPUT {{ rule }}
