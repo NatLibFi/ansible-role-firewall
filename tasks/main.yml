@@ -34,8 +34,9 @@
         firewall_ips_monit: "{{ firewall_ips_monit_base }}{% if firewall_ips_monit is defined and firewall_ips_monit|length>0 %}{% if firewall_ips_monit_base|length>0 %},{% endif %}{{firewall_ips_monit}}{% endif %}"
         firewall_ips_ssh:   "{{ firewall_ips_ssh_base }}{% if firewall_ips_ssh is defined and firewall_ips_ssh|length>0 %}{% if firewall_ips_ssh_base|length>0 %},{% endif %}{{firewall_ips_ssh}}{% endif %}"
 
-    - name: "Form up IPv4 rules set. Step 2: combine geenral rules"
-      set_fact: firewall_rules="{{ firewall_rules|default([]) + [ '-s '+item.ips+' -p tcp -m tcp --dport '+item.port+' -j ACCEPT' ] }}"
+    - name: "Form up IPv4 rules set. Step 2: combine general rules"
+      set_fact:
+        firewall_rules: "{{ firewall_rules|default([]) + ( item.ips | split(',') | map('trim') | reject('equalto','') | list | map('regex_replace','^(.*)$','-s \\1 -p tcp -m tcp --dport '+item.port+' -j ACCEPT') | list ) }}"
       when: item.ips|length > 0
       with_items:
         - { ips: "{{ firewall_ips_http }}",  port: "443" }
