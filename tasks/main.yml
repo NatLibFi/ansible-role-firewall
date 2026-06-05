@@ -7,6 +7,12 @@
     state: directory
     mode: u=rwx,g=rx,o=rx
 
+- name: Install iptables-persistent
+  become: true
+  package:
+    name: iptables-persistent
+    state: present
+
 - name: Create IPv4 firewall rules
   become: true
   template:
