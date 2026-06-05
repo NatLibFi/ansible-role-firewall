@@ -26,6 +26,23 @@
     - net.ipv6.conf.all.disable_ipv6
     - net.ipv6.conf.default.disable_ipv6
     - net.ipv6.conf.lo.disable_ipv6
+# - name: Disable IPv6 for apt if needed
+#   become: true
+#   copy:
+#     dest: /etc/apt/apt.conf.d/90-nt-force-ipv4
+#     content: |
+#       Acquire::ForceIPv4 "true";
+#     owner: root
+#     group: root
+#     mode: '0644'
+#   when: (disable_ipv6 | default(false) | bool)
+
+# - name: Remove apt disabled IPv6 if needed
+#   become: true
+#   ansible.builtin.file:
+#     path: /etc/apt/apt.conf.d/90-nt-force-ipv4
+#     state: absent
+#   when: not (disable_ipv6 | default(false) | bool)
 
 - name: Form up IPv4 rules set
   block:
